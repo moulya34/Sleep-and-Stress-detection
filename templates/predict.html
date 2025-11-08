@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sleep Apnea Result</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)),
+                        url('https://img.freepik.com/premium-vector/emergency-ekg-monitoring-blue-glowing-neon-heart-pulse-heart-beat-electrocardiogram_322958-842.jpg');
+            background-size: cover;
+            background-attachment: fixed;
+            min-height: 100vh;
+            font-family: 'Poppins', sans-serif;
+            color: white;
+        }
+
+        .result-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 30px rgba(0, 150, 255, 0.2);
+            transform: translateY(20px);
+            opacity: 0;
+            animation: cardEntrance 0.8s ease-out forwards;
+        }
+
+        @keyframes cardEntrance {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .status-badge {
+            font-size: 2.5rem;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+        }
+
+        .normal-status {
+            background: linear-gradient(45deg, #00b09b, #96c93d);
+        }
+
+        .warning-status {
+            background: linear-gradient(45deg, #ff416c, #ff4b2b);
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .btn-glow {
+            background: linear-gradient(45deg, #068FFF, #4E4FEB);
+            border: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-glow:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(6, 143, 255, 0.4);
+        }
+
+        .warning-card {
+            border-left: 5px solid #ff4b2b;
+            animation: warningEntrance 0.6s ease-out;
+        }
+
+        @keyframes warningEntrance {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .graph-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin: 20px 0;
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.6s forwards;
+        }
+
+        .graph-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 25px rgba(0,0,0,0.15);
+        }
+
+        .graph-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #2c3e50;
+            padding: 15px;
+            border-bottom: 2px solid #f1f1f1;
+            background: linear-gradient(45deg, #6c5ce7, #a8a4e6);
+            color: white;
+            border-radius: 15px 15px 0 0;
+        }
+
+        .graph-image {
+            padding: 15px;
+            transition: transform 0.3s ease;
+        }
+
+        .graph-image img {
+            border-radius: 8px;
+            width: 100%;
+            height: 400px;
+            object-fit: contain;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .graph-card:nth-child(1) { animation-delay: 0.1s; }
+        .graph-card:nth-child(2) { animation-delay: 0.2s; }
+        .graph-card:nth-child(3) { animation-delay: 0.3s; }
+        .graph-card:nth-child(4) { animation-delay: 0.4s; }
+        .graph-card:nth-child(5) { animation-delay: 0.5s; }
+        .graph-card:nth-child(6) { animation-delay: 0.6s; }
+        .graph-card:nth-child(7) { animation-delay: 0.7s; }
+        .graph-card:nth-child(8) { animation-delay: 0.8s; }
+
+        @media (max-width: 768px) {
+            .graph-image img {
+                height: 300px;
+            }
+            .graph-title {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top" style="background: rgba(0,0,0,0.7); backdrop-filter: blur(10px);">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <img src="{{ url_for('static', filename='logo1.png') }}" width="40" height="40" class="d-inline-block align-top" alt="Logo">
+                SleepGuardian
+            </a>
+        </div>
+    </nav>
+
+    <main class="container py-5" style="margin-top: 100px;">
+        <div class="result-card p-5 text-center">
+            <div class="mb-4">
+                <i class="fas fa-heartbeat fa-4x mb-3" style="color: #4E4FEB;"></i>
+                <h2 class="mb-3">Patient Analysis Report</h2>
+                <h3 class="text-muted">Patient Name: {{name}}</h3>
+            </div>
+
+            <div class="status-badge d-inline-block mb-4 {{'warning-status pulse' if pred != 'Normal' else 'normal-status'}}">
+                {{status}}!
+            </div>
+
+            {% if pred != "Normal" %}
+            <div class="warning-card bg-danger text-white p-4 rounded mb-4 text-left">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="fas fa-exclamation-triangle fa-2x mr-3"></i>
+                    <h4 class="m-0">Medical Attention Required</h4>
+                </div>
+                <p class="lead">Our analysis indicates potential health risks that require immediate professional consultation.</p>
+                <hr class="my-4 bg-white">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <a href="https://www.who.int/" class="btn btn-block btn-glow" target="_blank">
+                            <i class="fas fa-book-medical mr-2"></i>Medical Guidelines
+                        </a>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <a href="https://ihrs.in/" class="btn btn-block btn-glow" target="_blank">
+                            <i class="fas fa-user-md mr-2"></i>Find Specialist
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            
+
+            <div class="mt-5">
+                <a href="{{ url_for('fetalPage') }}" class="btn btn-glow btn-lg px-5">
+                    <i class="fas fa-redo mr-2"></i>New Analysis
+                </a>
+            </div>
+
+            <div class="container" style="padding-top: 80px;">
+                <h1 class="text-center mb-5 display-4" style="color: #2c3e50; text-shadow: 2px 2px 4px rgba(0,0,0,0.1);">
+                    📈 Performance Metrics Analysis
+                </h1>
+
+                <div class="row">
+                    {% for name, path in zip(names, image_path) %}
+                    <div class="col-md-6">
+                        <div class="graph-card">
+                            <div class="graph-title">{{ name }}</div>
+                            <div class="graph-image">
+                                <img src="{{ path }}" alt="{{ name }}" class="img-fluid">
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Add hover effect
+        document.querySelectorAll('.graph-image img').forEach(img => {
+            img.addEventListener('mouseover', () => {
+                img.style.transform = 'scale(1.02)';
+            });
+            img.addEventListener('mouseout', () => {
+                img.style.transform = 'scale(1)';
+            });
+        });
+    </script>
+</body>
+</html>

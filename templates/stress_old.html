@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stress Level Predictor</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet"/>
+    <link rel="canonical" href="https://getbootstrap.com/docs/4.0/examples/sticky-footer/">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+  
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #565656, #514f4f);
+            color: rgb(244, 244, 244);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #d9d5e0;
+            font-size: 2.5rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+
+        .input-group {
+            margin-bottom: 1rem;
+            
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #fbfbfc;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 0.8rem;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #000000;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 0 2px #7c3aed;
+        }
+
+        button {
+            background: linear-gradient(45deg, #7c3aed, #6d28d9);
+            color: rgb(47, 44, 44);
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: transform 0.3s ease;
+            margin-top: 1.5rem;
+            width: 100%;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        .result {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            display: none;
+        }
+
+        .result.show {
+            display: block;
+        }
+
+        .stress-level {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            color:rgb(222, 222, 222);
+        }
+
+        .prediction-text {
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-sm navbar-dark fixed-top bg-dark" style="background-color: black !important;">
+        <a style="text-decoration: none; color: white" href="{{ url_for('home') }}">Sleep Disorder Classification</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+           <span class="navbar-toggler-icon"></span>
+         </button>
+         <div class="collapse navbar-collapse" id="navbarNav">
+           <ul class="navbar-nav ml-auto">
+    
+             <li class="nav-item active">
+                <a class="nav-link" href="{{ url_for('stress') }}">Stress</a>
+              </li>
+             <li class="nav-item active">
+                <a class="nav-link" href="{{ url_for('logged') }}">Sleep Disorder</a>
+              </li>
+               <li class="nav-item active">
+                <a class="nav-link" href="{{ url_for('graph') }}">Graph</a>
+              </li>
+              
+              <li class="nav-item active">
+                <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+              </li>
+           </ul>
+         </div>
+       </nav>
+    <div class="container">
+        <h1>🧠 Stress Level Predictor</h1>
+        
+        <form action="/stress" method="POST">
+            <div class="form-grid">
+                <!-- Column 1 -->
+                <div class="input-group">
+                    <label>Age</label>
+                    <input type="number" name="Age" required>
+                </div>
+                <div class="input-group">
+                    <label for="Gender">Gender</label>
+                    <select name="Gender" id="Gender" required>
+                        <option value="0">Female</option>
+                        <option value="1">Male</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Occupation</label>
+                    <select name="Occupation" id="Occupation" required>
+                        <option value=0>Account Manager</option>
+                        <option value=1>Accountant</option>
+                        <option value=2>Actor</option>
+                        <option value=3>Advertising Executive</option>
+                        <option value=4>Advertising Manager</option>
+                        <option value=5>Architect</option>
+                        <option value=6>Artist</option>
+                        <option value=7>Baker</option>
+                        <option value=8>Bakery Owner</option>
+                        <option value=9>Bank Manager</option>
+                        <option value=10>Banker</option>
+                        <option value=11>Bartender</option>
+                        <option value=12>Biologist</option>
+                        <option value=13>Blacksmith</option>
+                        <option value=14>Brand Manager</option>
+                        <option value=15>Bus Driver</option>
+                        <option value=16>Business Analyst</option>
+                        <option value=17>Business Consultant</option>
+                        <option value=18>Business Owner</option>
+                        <option value=19>CEO</option>
+                        <option value=20>Carpenter</option>
+                        <option value=21>Chef</option>
+                        <option value=22>Civil Engineer</option>
+                        <option value=23>Civil Servant</option>
+                        <option value=24>Cleaner</option>
+                        <option value=25>Cobbler</option>
+                        <option value=26>Construction Engineer</option>
+                        <option value=27>Construction Manager</option>
+                        <option value=28>Construction Worker</option>
+                        <option value=29>Consultant</option>
+                        <option value=30>Content Creator</option>
+                        <option value=31>Content Strategist</option>
+                        <option value=32>Content Writer</option>
+                        <option value=33>Copywriter</option>
+                        <option value=34>Courier</option>
+                        <option value=35>Customer Support</option>
+                        <option value=36>Data Analyst</option>
+                        <option value=37>Data Engineer</option>
+                        <option value=38>Data Scientist</option>
+                        <option value=39>Database Administrator</option>
+                        <option value=40>Delivery Driver</option>
+                        <option value=41>Dentist</option>
+                        <option value=42>Designer</option>
+                        <option value=43>Developer</option>
+                        <option value=44>Digital Marketer</option>
+                        <option value=45>Doctor</option>
+                        <option value=46>Driver</option>
+                        <option value=47>Editor</option>
+                        <option value=48>Electrical Engineer</option>
+                        <option value=49>Electrical Technician</option>
+                        <option value=50>Electrician</option>
+                        <option value=51>Engineer</option>
+                        <option value=52>Entrepreneur</option>
+                        <option value=53>Event Coordinator</option>
+                        <option value=54>Event Manager</option>
+                        <option value=55>Event Planner</option>
+                        <option value=56>Executive Director</option>
+                        <option value=57>Factory Worker</option>
+                        <option value=58>Farmer</option>
+                        <option value=59>Fashion Designer</option>
+                        <option value=60>Financial Advisor</option>
+                        <option value=61>Financial Analyst</option>
+                        <option value=62>Financial Planner</option>
+                        <option value=63>Firefighter</option>
+                        <option value=64>Fisherwoman</option>
+                        <option value=65>Fitness Instructor</option>
+                        <option value=66>Fitness Trainer</option>
+                        <option value=67>Flower Seller</option>
+                        <option value=68>Freelancer</option>
+                        <option value=69>Graphic Designer</option>
+                        <option value=70>HR Executive</option>
+                        <option value=71>HR Manager</option>
+                        <option value=72>HR Specialist</option>
+                        <option value=73>Hair Stylist</option>
+                        <option value=74>Handicrafts Maker</option>
+                        <option value=75>Healthcare Assistant</option>
+                        <option value=76>Human Resources</option>
+                        <option value=77>Human Resources Manager</option>
+                        <option value=78>IT Consultant</option>
+                        <option value=79>IT Manager</option>
+                        <option value=80>IT Specialist</option>
+                        <option value=81>IT Support</option>
+                        <option value=82>IT Support Specialist</option>
+                        <option value=83>Insurance Agent</option>
+                        <option value=84>Interior Designer</option>
+                        <option value=85>Janitor</option>
+                        <option value=86>Journalist</option>
+                        <option value=87>Laboratory Technician</option>
+                        <option value=88>Lawyer</option>
+                        <option value=89>Librarian</option>
+                        <option value=90>Manager</option>
+                        <option value=91>Marketing Director</option>
+                        <option value=92>Marketing Executive</option>
+                        <option value=93>Marketing Manager</option>
+                        <option value=94>Marketing Specialist</option>
+                        <option value=95>Mechanic</option>
+                        <option value=96>Mechanical Engineer</option>
+                        <option value=97>Medical Assistant</option>
+                        <option value=98>Musician</option>
+                        <option value=99>Nanny</option>
+                        <option value=100>Network Administrator</option>
+                        <option value=101>Network Engineer</option>
+                        <option value=102>Nurse</option>
+                        <option value=103>Nurse Practitioner</option>
+                        <option value=104>Nutritional Specialist</option>
+                        <option value=105>Nutritionist</option>
+                        <option value=106>Operations Manager</option>
+                        <option value=107>Painter</option>
+                        <option value=108>Personal Trainer</option>
+                        <option value=109>Pharmacist</option>
+                        <option value=110>Photographer</option>
+                        <option value=111>Physician</option>
+                        <option value=112>Physicist</option>
+                        <option value=113>Physiotherapist</option>
+                        <option value=114>Pilot</option>
+                        <option value=115>Plumber</option>
+                        <option value=116>Police Officer</option>
+                        <option value=117>Potter</option>
+                        <option value=118>Primary School Teacher</option>
+                        <option value=119>Product Designer</option>
+                        <option value=120>Product Manager</option>
+                        <option value=121>Program Manager</option>
+                        <option value=122>Project Coordinator</option>
+                        <option value=123>Project Manager</option>
+                        <option value=124>Psychologist</option>
+                        <option value=125>Public Relations Specialist</option>
+                        <option value=126>Real Estate Agent</option>
+                        <option value=127>Receptionist</option>
+                        <option value=128>Research Analyst</option>
+                        <option value=129>Research Assistant</option>
+                        <option value=130>Research Scientist</option>
+                        <option value=131>Researcher</option>
+                        <option value=132>Restaurant Manager</option>
+                        <option value=133>Retail Manager</option>
+                        <option value=134>Retail Worker</option>
+                        <option value=135>Retired</option>
+                        <option value=136>SEO Specialist</option>
+                        <option value=137>Sales Executive</option>
+                        <option value=138>Sales Manager</option>
+                        <option value=139>Sales Representative</option>
+                        <option value=140>Salesperson</option>
+                        <option value=141>Scientist</option>
+                        <option value=142>Seamstress</option>
+                        <option value=143>Secretary</option>
+                        <option value=144>Security Guard</option>
+                        <option value=145>Security Officer</option>
+                        <option value=146>Shopkeeper</option>
+                        <option value=147>Social Worker</option>
+                        <option value=148>Software Architect</option>
+                        <option value=149>Software Developer</option>
+                        <option value=150>Software Engineer</option>
+                        <option value=151>Software Tester</option>
+                        <option value=152>Street Vendor</option>
+                        <option value=153>Student</option>
+                        <option value=154>Surgeon</option>
+                        <option value=155>Tailor</option>
+                        <option value=156>Taxi Driver</option>
+                        <option value=157>Teacher</option>
+                        <option value=158>Technician</option>
+                        <option value=159>Therapist</option>
+                        <option value=160>Truck Driver</option>
+                        <option value=161>UX Designer</option>
+                        <option value=162>Vegetable Vendor</option>
+                        <option value=163>Veterinarian</option>
+                        <option value=164>Waitress</option>
+                        <option value=165>Warehouse Worker</option>
+                        <option value=166>Weaver</option>
+                        <option value=167>Web Developer</option>
+                        <option value=168>Writer</option>
+                        <option value=167>Child</option>
+                        <option value=168>Un-employment</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Marital Status (0=Single, 1=Married)</label>
+                    <!-- <input type="number" name="Marital_Status" min="0" max="1" required> -->
+                    <select name="Marital_Status" id="Marital_Status" required>
+                        <option value="0">No</option>
+                        <option value="1">Yes</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Sleep Duration (hours)</label>
+                    <input type="number" step="0.1" name="Sleep_Duration" required>
+                </div>
+                <div class="input-group">
+                    <label>Sleep Quality (1-10)</label>
+                    <select name="Sleep_Quality" required>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                        <option value="9">9</option>
+                        <option value="10">10</option>
+                    </select>
+                </div>
+                
+                <div class="input-group">
+                    <label>Physical Activity (hours/week)</label>
+                    <input type="number" name="Physical_Activity" required>
+                </div>
+                <div class="input-group">
+                    <label>Screen Time (hours/day)</label>
+                    <input type="number" name="Screen_Time" required>
+                </div>
+                <div class="input-group">
+                    <label>Caffeine Intake (cups/day)</label>
+                    <input type="number" name="Caffeine_Intake" required>
+                </div>
+
+                <!-- Column 2 -->
+                <div class="input-group">
+                    <label>Alcohol Intake (ml / day)</label>
+                    <input type="number" name="Alcohol_Intake" required>
+                </div>
+                <div class="input-group">
+                    <label>Smoking Habit</label>
+                    <select name="Smoking_Habit" required>
+                        <option value="0">No</option>
+                        <option value="1">Yes</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Work Hours (daily)</label>
+                    <input type="number" name="Work_Hours" required>
+                </div>
+                <div class="input-group">
+                    <label>Travel Time (hours/day)</label>
+                    <input type="number" name="Travel_Time" required>
+                </div>
+                <div class="input-group">
+                    <label>Social Interactions (hrs/day)</label>
+                    <input type="number" name="Social_Interactions" required>
+                </div>
+                <div class="input-group">
+                    <label>Meditation Practice (min/ day)</label>
+                    <input type="number" name="Meditation_Practice" required>
+                </div>
+                <div class="input-group">
+                    <label>Exercise Type (1-5)</label>
+                    <select name="Exercise_Type" required>
+                        <option value="1">0</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Blood Pressure (mmHg)</label>
+                    <input type="number" name="Blood_Pressure" required>
+                </div>
+                <div class="input-group">
+                    <label>Cholesterol Level (mg/dL)</label>
+                    <input type="number" name="Cholesterol_Level" required>
+                </div>
+                <div class="input-group">
+                    <label>Blood Sugar Level (mg/dL)</label>
+                    <input type="number" name="Blood_Sugar_Level" required>
+                </div>
+            </div>
+
+            <button type="submit" link="resultstress.html">Predict Stress Level 🔮</button>
+        </form>
+        {% if prediction %}
+        <div class="result show">
+            <div class="stress-level">Stress Level: {{ prediction }}</div>
+            <div class="prediction-text">
+                {% if prediction == 0 %}
+                😌 Low Stress - Keep up the good work!
+                {% elif prediction == 1 %}
+                😐 Moderate Stress - Take some time to relax
+                {% else %}
+                😰 High Stress - Please consult a professional
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+        
+    
+</body>
+</html>

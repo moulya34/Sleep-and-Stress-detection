@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stress Level Result</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        
+        .result-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-top: 100px;
+            padding: 30px;
+            transform: translateY(0);
+            animation: fadeInUp 0.8s ease;
+        }
+
+        .stress-level {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .prediction-text {
+            font-size: 1.4rem;
+            text-align: center;
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .emoji {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        /* Different background colors based on stress level */
+        .level-low { background-color: rgba(40, 167, 69, 0.1); border-left: 5px solid #28a745; }
+        .level-moderate { background-color: rgba(255, 193, 7, 0.1); border-left: 5px solid #ffc107; }
+        .level-high { background-color: rgba(220, 53, 69, 0.1); border-left: 5px solid #dc3545; }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .result-card {
+                margin: 100px 15px 0 15px;
+            }
+            .stress-level {
+                font-size: 2rem;
+            }
+            .prediction-text {
+                font-size: 1.2rem;
+            }
+        }
+        .graph-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin: 20px 0;
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.6s forwards;
+        }
+
+        .graph-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 25px rgba(0,0,0,0.15);
+        }
+
+        .graph-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #2c3e50;
+            padding: 15px;
+            border-bottom: 2px solid #f1f1f1;
+            background: linear-gradient(45deg, #6c5ce7, #a8a4e6);
+            color: white;
+            border-radius: 15px 15px 0 0;
+        }
+
+        .graph-image {
+            padding: 15px;
+            transition: transform 0.3s ease;
+        }
+
+        .graph-image img {
+            border-radius: 8px;
+            width: 100%;
+            height: 400px;
+            object-fit: contain;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .graph-card:nth-child(1) { animation-delay: 0.1s; }
+        .graph-card:nth-child(2) { animation-delay: 0.2s; }
+        .graph-card:nth-child(3) { animation-delay: 0.3s; }
+        .graph-card:nth-child(4) { animation-delay: 0.4s; }
+        .graph-card:nth-child(5) { animation-delay: 0.5s; }
+        .graph-card:nth-child(6) { animation-delay: 0.6s; }
+        .graph-card:nth-child(7) { animation-delay: 0.7s; }
+        .graph-card:nth-child(8) { animation-delay: 0.8s; }
+
+        @media (max-width: 768px) {
+            .graph-image img {
+                height: 300px;
+            }
+            .graph-title {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-sm navbar-dark fixed-top bg-dark" style="background-color: black !important;">
+        <a style="text-decoration: none; color: white" href="{{ url_for('home') }}">Sleep Disorder Classification</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+           <span class="navbar-toggler-icon"></span>
+         </button>
+         <div class="collapse navbar-collapse" id="navbarNav">
+           <ul class="navbar-nav ml-auto">
+             <li class="nav-item active">
+                <a class="nav-link" href="{{ url_for('stress') }}">Stress</a>
+              </li>
+             <li class="nav-item active">
+                <a class="nav-link" href="{{ url_for('logged') }}">Sleep Disorder</a>
+              </li>
+              <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('graph') }}">Performance Analysis</a>
+                    </li>
+              <li class="nav-item active">
+                <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+              </li>
+           </ul>
+         </div>
+       </nav>
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                
+                <div class="result-card">
+                    <div class="emoji">
+                        {% if prediction == 0 %}
+                            😌
+                        {% elif prediction == 1 %}
+                            😐
+                        {% else %}
+                            😰
+                        {% endif %}
+                    </div>
+                    
+                    <div class="stress-level text-center">
+                        {% if prediction == 0 %}
+                            Low Stress Level
+                        {% elif prediction == 1 %}
+                            Moderate Stress Level
+                        {% else %}
+                            High Stress Level
+                        {% endif %}
+                    </div>
+
+                    <div class="prediction-text 
+                        {% if prediction == 0 %}level-low
+                        {% elif prediction == 1 %}level-moderate
+                        {% else %}level-high
+                        {% endif %}">
+                        {% if prediction == 0 %}
+                        You're doing great! Keep maintaining your healthy habits and positive mindset.
+                        {% elif prediction == 1 %}
+                        Consider taking some time for self-care. Try relaxation techniques or physical activity.
+                        {% else %}
+                        It's important to prioritize your well-being. Please consider consulting a professional.
+                        {% endif %}
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <a href="{{ url_for('home') }}" class="btn btn-primary">Back to Home</a>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+
+    <div class="container" style="padding-top: 80px;">
+    <h1 class="text-center mb-5 display-4" style="color: #2c3e50; text-shadow: 2px 2px 4px rgba(0,0,0,0.1);">
+        📈 Performance Metrics Analysis
+    </h1>
+
+    <!-- Debug information (remove after testing) -->
+    <div style="display: none;">
+        <p>Names: {{ names }}</p>
+        <p>Image Paths: {{ image_path }}</p>
+        <p>Names length: {{ names|length }}</p>
+        <p>Image Paths length: {{ image_path|length }}</p>
+    </div>
+
+    <div class="row">
+        {% if names and image_path %}
+            {% for name, path in zip(names, image_path) %}
+            <div class="col-md-6">
+                <div class="graph-card">
+                    <div class="graph-title">{{ name }}</div>
+                    <div class="graph-image">
+                        <img src="{{ path }}" alt="{{ name }}" class="img-fluid">
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12 text-center">
+                <p class="text-muted">No performance metrics available</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Add hover effect
+        document.querySelectorAll('.graph-image img').forEach(img => {
+            img.addEventListener('mouseover', () => {
+                img.style.transform = 'scale(1.02)';
+            });
+            img.addEventListener('mouseout', () => {
+                img.style.transform = 'scale(1)';
+            });
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
